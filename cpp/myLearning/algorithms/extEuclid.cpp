@@ -7,12 +7,12 @@ std::tuple<int, int, int> extendedEuclid(int a, int b);
 
 int main()
 {
-    int d, x, y;
-    std::tie(d, x, y) = extendedEuclid(44, 20);
+    int gcd, x, y;
+    std::tie(gcd, x, y) = extendedEuclid(44, 20);
     // d = gcd(35, 10);
-    std::cout << d << '\n';
+    std::cout << "gcd: " << gcd << '\n';
     std::cout << x << '\n';
-    std::cout << y << '\n';
+    std::cout << y << '\n'; // This is d (in RSA)
 }
 
 // std::ifstream inputfile;   // create input file stream
