@@ -1,6 +1,26 @@
 # Learning Git, GitHub, and GitLab
 
-- init Git repository inside an empty folder:
+- [Learning Git, GitHub, and GitLab](#learning-git-github-and-gitlab)
+  - [GitHub Common use case](#github-common-use-case)
+  - [Git](#git)
+  - [GitLab](#gitlab)
+  - [Refernce](#refernce)
+
+## GitHub Common use case
+If I want to create a new repo, and do some work on it:
+```
+mkdir repo-folder
+cd repo-folder
+git init
+...
+git add .
+git commit -m "message"
+git push
+```
+
+
+## Git
+- git init
 ```
 mkdir my-cool-website
 cd my-cool-website
@@ -51,12 +71,18 @@ resolving conflicts in VSC or other IDEs
 
 ## GitLab
 - Add SSH Key\
-`ssh-keygen`
+`ssh-keygen`: use default algorithm to generate ssh key, which is saved in "id_ed25519.pub".
+`ssh-keygen -t rsa -b 4096`: use RSA algorithm with bits larger than 4096 to generate ssh key. The key is in "id_rsa.pub" file\
+
+- Git Clone\
+`git clone gitlab-link`\
+if we have to use token, we first setup the token from the project account, then we can git clone this way: `git clone https://username:token@gitlab-link.git`\
+
 
 - git remote\
 `git remote add origin <repository_url>`: tell Git which remote repository in GitLab is linked to a local directory.\
 
-- git pull\ 
+- git pull\
 pull changes from a remote repo: `git pull origin master`\
 
 - git branch\
@@ -64,10 +90,11 @@ pull changes from a remote repo: `git pull origin master`\
 `git branch`\
 `git branch -a`\
 `git checkout <branch-name>`\
-have many remote branches that you want to fetch at once: `git pull -all`\
+push a new local branch to a remote Git repo:
+`git push -u origin <branch>`: -u (short for --set-upstream)\
+<br>
 
 
 
-
-# Refernce
+## Refernce
 - Udemy course by Valentin: https://www.udemy.com/course/introduction-to-git-for-gitlab-projects/
