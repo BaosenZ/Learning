@@ -1,1 +1,0 @@
-本工程实现从MBR到LOADER，由LOADER实现进入保护模式
