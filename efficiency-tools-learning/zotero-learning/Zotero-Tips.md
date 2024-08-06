@@ -8,5 +8,3 @@
 
 ![alt text](zotero-md-images/image-1.png)
 
-<img src="zotero-md-images/image.png" width="100" height="50" />
-
