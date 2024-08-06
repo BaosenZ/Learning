@@ -1,3 +1,3 @@
 # Learning and Creating
 
-This is my learning and creating repo. It will contain my modified code, learning, or tutorials. \
+This is my learning and creating repo. It will contain code, docs, and tutorials I created for my own use conveniently.
