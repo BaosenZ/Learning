@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Blog</title>
+</head>
+
+<body>
+    <!-- Display flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <p>
+        {% for category, message in messages %}
+        <strong>{{ category.capitalize() }}:</strong> {{ message }}
+        {% endfor %}
+    </p>
+    {% endif %}
+    {% endwith %}
+
+    <h1>Edit Blog Post</h1>
+    <form method="POST">
+        <textarea name="content" rows="10" cols="50">
+            This is a sample blog post. Only the owner can edit this post.
+        </textarea>
+        <br>
+        <button type="submit">Save</button>
+    </form>
+    <a href="{{ url_for('blog') }}">Back to Blog</a>
+</body>
+
+</html>
