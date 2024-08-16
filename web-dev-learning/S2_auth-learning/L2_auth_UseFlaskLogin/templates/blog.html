@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog</title>
+</head>
+
+<body>
+    <!-- Display flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <p>
+        {% for category, message in messages %}
+        <strong>{{ category.capitalize() }}:</strong> {{ message }}
+        {% endfor %}
+    </p>
+    {% endif %}
+    {% endwith %}
+
+    <h1>My Blog</h1>
+    <p>This is a sample blog post. Only the owner can edit this post.</p>
+    {% if current_user.is_authenticated %}
+    <p><a href="{{ url_for('edit_blog') }}">Edit Blog</a></p>
+    {% endif %}
+    <p><a href="{{ url_for('home') }}">Back to Home</a></p>
+</body>
+
+</html>

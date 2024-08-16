@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog</title>
+</head>
+
+<body>
+    <h1>Blog Posts</h1>
+
+    <!-- Form to create a new post -->
+    <form action="{{ url_for('create_post') }}" method="post" enctype="multipart/form-data">
+        <label for="title">Title:</label>
+        <input type="text" name="title" id="title" required>
+        <br>
+        <label for="content">Content:</label>
+        <textarea name="content" id="content" required></textarea>
+        <br>
+        <label for="image">Upload Image:</label>
+        <input type="file" name="image" id="image">
+        <br>
+        <button type="submit">Create Post</button>
+    </form>
+
+    <ul>
+        {% for post in posts %}
+        <li>
+            <h2>{{ post.title }}</h2>
+            <p>{{ post.content }}</p>
+            {% if post.image %}
+            <img src="data:image/jpeg;base64,{{ post.image }}" alt="Post Image">
+            {% endif %}
+            <form action="{{ url_for('delete_post') }}" method="post" style="display:inline;">
+                <input type="hidden" name="post_id" value="{{ post.id }}">
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+
+</html>

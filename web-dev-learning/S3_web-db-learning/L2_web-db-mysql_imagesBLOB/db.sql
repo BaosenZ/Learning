@@ -1,0 +1,13 @@
+CREATE DATABASE IF NOT EXISTS blogdb;
+
+USE blogdb;
+
+CREATE TABLE postsTable (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    images image LONGBLOB
+);
+
+-- ALTER TABLE posts ADD image LONGBLOB;

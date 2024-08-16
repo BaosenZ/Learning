@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Excel Content</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script>
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    let htmlString = XLSX.utils.sheet_to_html(worksheet, { editable: true });
+
+                    console.log(htmlString) // for debug
+
+                    // Remove the first row if it is empty
+                    htmlString = removeEmptyFirstRow(htmlString);
+
+                    document.getElementById('tableContainer').innerHTML = htmlString;
+
+                    // Apply custom styling to the specific column
+                    styleSpecificColumn('Extractant_Name');
+
+                    // Check for red-styled cells and display a message if any are found
+                    checkForRedCells();
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function removeEmptyFirstRow(htmlString) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlString;
+            const firstRow = tempDiv.querySelector('table tr');
+
+            if (firstRow) {
+                const isEmpty = Array.from(firstRow.cells).every(cell => cell.innerText.trim() === '');
+                if (isEmpty) {
+                    firstRow.remove();
+                }
+            }
+            return tempDiv.innerHTML;
+        }
+
+        function styleSpecificColumn(columnName) {
+            const rows = document.querySelectorAll('#tableContainer table tr');
+            let targetIndex = -1;
+
+            // Find the index of the target column based on the header row
+            const headerRow = rows[0];
+            if (headerRow) {
+                const cells = headerRow.querySelectorAll('td');
+                cells.forEach((cell, index) => {
+                    if (cell.innerText.trim() === columnName) {
+                        targetIndex = index;
+                    }
+                });
+            }
+
+            if (targetIndex !== -1) {
+                // Apply style to the target column's cells in subsequent rows
+                rows.forEach((row, rowIndex) => {
+                    if (rowIndex > 0) {  // Skip the header row
+                        const cells = row.querySelectorAll('td');
+                        const cell = cells[targetIndex];
+                        if (cell && cell.innerText.trim() === '') {
+                            cell.style.backgroundColor = 'red';
+                            cell.style.color = 'white';
+                        }
+                    }
+                });
+            }
+        }
+
+        function checkForRedCells() {
+            const cells = document.querySelectorAll('#tableContainer table td');
+            let hasRedCell = false;
+
+            cells.forEach(cell => {
+                if (cell.style.backgroundColor === 'red') {
+                    hasRedCell = true;
+                }
+            });
+
+            const message = document.getElementById('reminderMessage');
+            const actionButton = document.getElementById('actionButton');
+            if (hasRedCell) {
+                message.innerText = "Please fill out the empty cells marked in red.";
+                actionButton.disabled = true;
+            } else {
+                message.innerText = "";
+                actionButton.disabled = false;
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2>Select an Excel File</h2>
+        <form>
+            <div class="form-group">
+                <input type="file" name="file" class="form-control-file" onchange="handleFileSelect(event)">
+            </div>
+            <button id="actionButton" class="btn btn-primary mt-4">Upload</button>
+        </form>
+
+        <div id="tableContainer" class="table-responsive mt-4">
+            <!-- The Excel data will be displayed here -->
+        </div>
+
+        <!-- Reminder Message -->
+        <p id="reminderMessage" class="mt-4 text-danger"></p>
+
+
+    </div>
+</body>
+
+</html>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog</title>
+    <title>Edit Blog</title>
 </head>
 
 <body>
@@ -19,12 +19,15 @@
     {% endif %}
     {% endwith %}
 
-    <h1>My Blog</h1>
-    <p>This is a sample blog post. Only the owner can edit this post.</p>
-    {% if 'user' in session %}
-    <p><a href="{{ url_for('edit_blog') }}">Edit Blog</a></p>
-    {% endif %}
-    <p><a href="{{ url_for('home') }}">Back to Home</a></p>
+    <h1>Edit Blog Post</h1>
+    <form method="POST">
+        <textarea name="content" rows="10" cols="50">
+            This is a sample blog post. Only the owner can edit this post.
+        </textarea>
+        <br>
+        <button type="submit">Save</button>
+    </form>
+    <a href="{{ url_for('blog') }}">Back to Blog</a>
 </body>
 
 </html>
