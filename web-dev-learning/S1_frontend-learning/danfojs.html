@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Processing with Danfo.js</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+
+<body>
+    <h2>Upload Excel File</h2>
+    <input type="file" id="file-input" class="form-control-file" />
+    <div id="tableContainer" class="table-responsive mt-4"></div>
+    <div id="log" class="log"></div>
+
+
+    <!-- JS scripts start here -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.17.0/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/danfojs@1.1.2/lib/bundle.min.js"></script>
+    <script>
+        document.getElementById('file-input').addEventListener('change', handleFile);
+
+        async function handleFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async function (e) {
+                    const data_from_uploadFile = new Uint8Array(e.target.result);
+                    const workbook_XLSX = XLSX.read(data_from_uploadFile, { type: 'array' });
+
+                    //for debug
+                    console.log(typeof (data_from_uploadFile)) // return js array type
+                    console.log(typeof (workbook_XLSX)) // return
+
+                    let processingLog = ''
+
+                    // Check if the sheet "Experimental" exists
+                    // const sheetName_correct = ['Experimental', 'Computational'];
+                    const sheetName_correct = 'Experimental';
+
+                    const sheetName_import = workbook_XLSX.SheetNames[0];
+
+                    if (sheetName_import !== sheetName_correct) {
+                        processingLog += "\n" + "Please Correct your Excel file sheet name! ";
+                    } else {
+                        processingLog += "\n" + "Your Excel file sheet name is correct! ";
+                    }
+
+                    // Convert worksheet to json then Danfo.js DataFrame
+                    const worksheet_xlsx = workbook_XLSX.Sheets[sheetName_import];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet_xlsx, { header: 1, defval: "" });
+                    const df = new dfd.DataFrame(jsonData);
+
+                    // Get the total number of rows and columns
+                    const totalRows = df.shape[0];
+                    const totalColumns = df.columns.length;
+
+                    processingLog += "\n" + 'total rows: ' + totalRows;
+                    processingLog += "\n" + 'total columns: ' + totalColumns;
+                    console.log(processingLog);
+
+                    // Find out the column name number
+                    let col_name_row = 0;
+                    let breakBoolean = false;
+                    for (let i = 0; i < totalRows; i++) {
+                        for (let j = 0; j < totalColumns; j++) {
+                            let cellValue = df.iloc({ rows: [i], columns: [j] }).values[0][0];
+
+                            // for debug
+                            // console.log(`Value at Row ${i}, Column ${df.columns[j]}: `, cellValue);
+
+                            // If the col contain `Extractant_Name`, 'SMILES', or 'DOI', we use this col number
+                            if (cellValue === 'Extractant_Name' || cellValue === 'SMILES' || cellValue === 'DOI') {
+                                col_name_row = i;
+                                breakBoolean = true;
+
+                                // for debug
+                                console.log(col_name_row) // return 1 for correct uploaded file
+
+                                break;
+                            }
+                        }
+                        if (breakBoolean) {
+                            break;
+                        }
+                    }
+
+                    // Check if the col name row is 1 or not
+                    if (col_name_row !== 1) {
+                        processingLog += "\n" + "Please correct your colomn name row."
+                    }
+
+                    // Check if the column name of upload file contain all mandatory col name in the corresponding array
+                    mandatory_col_names_array = ['Extractant_Name', 'Extractant_Concentration_M', 'Organic_Solvent', 'Acid', 'Acid_Concentration_M', 'Metal', 'Metal_Concentration_mM2', 'Metal_Concentration_mM', 'Distribution_Coefficient', 'Temperature_C', 'DOI', 'SMILES']
+                    for (let i = 0; i < mandatory_col_names_array.length; i++) {
+                        nameContainBoolean = false;
+                        for (let j = 0; j < totalColumns; j++) {
+                            let cellValue = df.iloc({ rows: [col_name_row], columns: [j] }).values[0][0];
+                            if (cellValue === mandatory_col_names_array[i]) {
+                                nameContainBoolean = true;
+                                break;
+                            }
+                        }
+                        if (!nameContainBoolean) {
+                            processingLog += "\n" + "missing column" + mandatory_col_names_array[i];
+                        }
+                    }
+
+                    // for debug
+                    console.log(processingLog);
+                    console.log("col names check done!");
+
+                    // Find out the value start
+
+                    let log = "";
+                    let emptyColumns = new Set();
+
+                    // Mark empty cells and log the columns with empty cells, ignoring the first row
+                    df.values.forEach((row, rowIndex) => {
+                        if (rowIndex === 0) return; // Skip the first row
+                        row.forEach((cell, colIndex) => {
+                            if (cell === null || cell === "") {
+                                df.iloc({ rows: [rowIndex], columns: [colIndex] }).values[0][0] = "EMPTY";
+                                emptyColumns.add(df.columns[colIndex]);
+                            }
+                        });
+                    });
+
+                    // Log the columns with empty cells
+                    if (emptyColumns.size > 0) {
+                        log += "Columns with empty cells: " + Array.from(emptyColumns).join(', ') + "\n";
+                    } else {
+                        log += "No empty cells found.\n";
+                    }
+
+                    // Convert the DataFrame back to XLSX worksheet
+                    const sheet = XLSX.utils.aoa_to_sheet(df.values);
+                    const newWorkbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(newWorkbook, sheet, 'Processed Data');
+
+                    // Convert the XLSX worksheet to HTML
+                    const htmlString = XLSX.utils.sheet_to_html(sheet, { id: 'processed-table', editable: true });
+
+                    // Display the processed table and log
+                    document.getElementById('tableContainer').innerHTML = htmlString;
+                    document.getElementById('log').innerText = log;
+
+                    // Apply custom styling to the specific column
+                    styleSpecificColumn('Extractant_Name');
+
+                    // Highlight empty cells in the HTML table after rendering
+                    // document.querySelectorAll('#processed-table table tr').forEach(cell => {
+                    //     if (cell && cell.innerText.trim() === '') {
+                    //         cell.classList.add('empty-cell');
+                    //     }
+                    // });
+                }
+                reader.readAsArrayBuffer(file);
+
+            };
+
+
+            function styleSpecificColumn(columnName) {
+                const rows = document.querySelectorAll('#tableContainer table tr');
+                let targetIndex = -1;
+
+                // Find the index of the target column based on the header row
+                const headerRow = rows[1];
+                if (headerRow) {
+                    const cells = headerRow.querySelectorAll('td');
+                    cells.forEach((cell, index) => {
+                        if (cell.innerText.trim() === columnName) {
+                            targetIndex = index;
+                        }
+                    });
+                }
+
+                if (targetIndex !== -1) {
+                    // Apply style to the target column's cells in subsequent rows
+                    rows.forEach((row, rowIndex) => {
+                        if (rowIndex > 0) {  // Skip the header row
+                            const cells = row.querySelectorAll('td');
+                            const cell = cells[targetIndex];
+                            if (cell && cell.innerText.trim() === '') {
+                                cell.style.backgroundColor = 'red';
+                                cell.style.color = 'white';
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
