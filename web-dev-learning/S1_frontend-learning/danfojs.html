@@ -58,6 +58,7 @@
 
                     processingLog += "\n" + 'total rows: ' + totalRows;
                     processingLog += "\n" + 'total columns: ' + totalColumns;
+                    processingLog += "\n";
                     console.log(processingLog);
 
                     // Find out the column name number
@@ -103,7 +104,7 @@
                             }
                         }
                         if (!nameContainBoolean) {
-                            processingLog += "\n" + "missing column" + mandatory_col_names_array[i];
+                            processingLog += "\n" + "missing column: " + mandatory_col_names_array[i];
                         }
                     }
 
@@ -111,83 +112,90 @@
                     console.log(processingLog);
                     console.log("col names check done!");
 
-                    // Find out the value start
 
-                    let log = "";
-                    let emptyColumns = new Set();
+                    // Mark empty cells and corresponding cols, log the cols
+                    let emptyColumns_array = [];
+                    let emptyCell_2Darray = [];
+                    for (let col = 1; col < totalColumns; col++) {
+                        EmptyContainBoolean = false;
+                        for (let row = col_name_row; row < totalRows; row++) {
+                            cellValue = df.iloc({ rows: [row], columns: [col] }).values[0][0];
+                            if (cellValue === null || cellValue === "") {
+                                // only test mandatory_col_name
+                                currentColName = df.iloc({ rows: [col_name_row], columns: [col] }).values[0][0];
+                                if (mandatory_col_names_array.includes(currentColName)) {
+                                    emptyCell_2Darray.push([row, col]);
+                                    EmptyContainBoolean = true;
+                                }
 
-                    // Mark empty cells and log the columns with empty cells, ignoring the first row
-                    df.values.forEach((row, rowIndex) => {
-                        if (rowIndex === 0) return; // Skip the first row
-                        row.forEach((cell, colIndex) => {
-                            if (cell === null || cell === "") {
-                                df.iloc({ rows: [rowIndex], columns: [colIndex] }).values[0][0] = "EMPTY";
-                                emptyColumns.add(df.columns[colIndex]);
                             }
-                        });
-                    });
-
-                    // Log the columns with empty cells
-                    if (emptyColumns.size > 0) {
-                        log += "Columns with empty cells: " + Array.from(emptyColumns).join(', ') + "\n";
-                    } else {
-                        log += "No empty cells found.\n";
+                        }
+                        if (EmptyContainBoolean) {
+                            emptyColumns_array.push(col);
+                            processingLog += "\n" + "Columns with empty cells: " + col + " the column name is " + df.iloc({ rows: [col_name_row], columns: [col] }).values[0][0];
+                        }
                     }
 
-                    // Convert the DataFrame back to XLSX worksheet
-                    const sheet = XLSX.utils.aoa_to_sheet(df.values);
-                    const newWorkbook = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(newWorkbook, sheet, 'Processed Data');
+                    console.log(emptyCell_2Darray);
+                    console.log(emptyColumns_array);
+                    console.log(processingLog);
 
+                    // this need to check if number of extractant reported in a single cell, matches the respective
+                    // number of smiles strings provided 
+                    for (let row = col_name_row; row < totalRows; row++) {
+                        extractantName_oneCell = df.iloc({ rows: [row], columns: [5] }).values[0][0];
+                        smiles_oneCell = df.iloc({ rows: [row], columns: [30] }).values[0][0];
+                        if (extractantName_oneCell.includes(',')) {
+                            splitExtractantName = extractantName_oneCell.split(',');
+                            splitSmiles = smiles_oneCell.split(',');
+                            if (splitExtractantName.length !== splitSmiles.length) {
+                                processingLog += "\n" + "Check number of extractant_name and number of SMILEs string in row number " + (row - 2);
+                            }
+                        }
+
+                        acid_oneCell = df.iloc({ rows: [row], columns: [8] }).values[0][0];
+                        acidConc_oneCell = df.iloc({ rows: [row], columns: [9] }).values[0][0];
+                        if (acid_oneCell.includes(',')) {
+                            splitAcid = acid_oneCell.split(',');
+                            splitAcidConc = acidConc_oneCell.toString().split(',');
+                            if (splitAcid.length !== splitAcidConc.length) {
+                                processingLog += "\n" + "Check number of acids and number of acid concentration in row number " + (row - 2);
+                            }
+                        }
+                    }
+
+
+
+                    // Convert the DataFrame back to XLSX worksheet
+                    // const sheet = XLSX.utils.aoa_to_sheet(df.values);
+                    // const newWorkbook = XLSX.utils.book_new();
+                    // XLSX.utils.book_append_sheet(newWorkbook, sheet, 'Processed Data');
                     // Convert the XLSX worksheet to HTML
-                    const htmlString = XLSX.utils.sheet_to_html(sheet, { id: 'processed-table', editable: true });
+                    // const htmlString = XLSX.utils.sheet_to_html(sheet, { id: 'processed-table', editable: true });
+
+                    // Convert old worksheet to HTML (I don't process the data)
+                    const htmlString = XLSX.utils.sheet_to_html(worksheet_xlsx, { editable: true });
 
                     // Display the processed table and log
                     document.getElementById('tableContainer').innerHTML = htmlString;
-                    document.getElementById('log').innerText = log;
+                    document.getElementById('log').innerText = processingLog;
 
-                    // Apply custom styling to the specific column
-                    styleSpecificColumn('Extractant_Name');
-
-                    // Highlight empty cells in the HTML table after rendering
-                    // document.querySelectorAll('#processed-table table tr').forEach(cell => {
-                    //     if (cell && cell.innerText.trim() === '') {
-                    //         cell.classList.add('empty-cell');
-                    //     }
-                    // });
+                    styleEmptyCells(emptyCell_2Darray)
                 }
                 reader.readAsArrayBuffer(file);
-
             };
 
-
-            function styleSpecificColumn(columnName) {
+            function styleEmptyCells(emptyCell_2Darray) {
                 const rows = document.querySelectorAll('#tableContainer table tr');
-                let targetIndex = -1;
+                const numColumns = emptyCell_2Darray.length;
 
-                // Find the index of the target column based on the header row
-                const headerRow = rows[1];
-                if (headerRow) {
-                    const cells = headerRow.querySelectorAll('td');
-                    cells.forEach((cell, index) => {
-                        if (cell.innerText.trim() === columnName) {
-                            targetIndex = index;
-                        }
-                    });
-                }
+                for (let i = 0; i < emptyCell_2Darray.length; i++) {
+                    const rowIndex = emptyCell_2Darray[i][0];
+                    const colIndex = emptyCell_2Darray[i][1];
 
-                if (targetIndex !== -1) {
-                    // Apply style to the target column's cells in subsequent rows
-                    rows.forEach((row, rowIndex) => {
-                        if (rowIndex > 0) {  // Skip the header row
-                            const cells = row.querySelectorAll('td');
-                            const cell = cells[targetIndex];
-                            if (cell && cell.innerText.trim() === '') {
-                                cell.style.backgroundColor = 'red';
-                                cell.style.color = 'white';
-                            }
-                        }
-                    });
+                    const cells = rows[rowIndex].querySelectorAll('td');  // Return all cells in the specific row
+                    cells[colIndex].style.backgroundColor = 'red';
+                    cells[colIndex].style.color = 'white';
                 }
             }
         }
