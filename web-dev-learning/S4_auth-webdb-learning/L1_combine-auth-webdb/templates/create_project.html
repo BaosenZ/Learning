@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Project</title>
+    <script>
+        function toggleEndDate() {
+            var isPresentChecked = document.getElementById("is_present").checked;
+            var endDateField = document.getElementById("end_date");
+            endDateField.disabled = isPresentChecked;
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Display flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <p>
+        {% for category, message in messages %}
+        <strong>{{ category.capitalize() }}:</strong> {{ message }}
+        {% endfor %}
+    </p>
+    {% endif %}
+    {% endwith %}
+
+    <h1>Create a New Post</h1>
+    <form action="{{ url_for('create_project') }}" method="post" enctype="multipart/form-data">
+        <label for="title">Title:</label>
+        <input type="text" name="title" id="title" required>
+        <br>
+
+        <label for="label">Label:</label>
+        <input type="text" name="label" id="label"></input>
+        <br>
+
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" required><br><br>
+
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date"><br><br>
+
+        <label for="is_present">I am currently working this project</label>
+        <input type="checkbox" id="is_present" name="is_present" onclick="toggleEndDate()">
+        <br>
+        <br>
+
+        <label for="content">Content:</label>
+        <textarea name="content" id="content" required></textarea>
+        <br>
+
+        <label for="image">Upload Image:</label>
+        <input type="file" name="image" id="image">
+        <br>
+
+        <button type="submit">Create</button>
+    </form>
+    <a href="{{ url_for('all_projects') }}">Back to Home</a>
+</body>
+
+</html>

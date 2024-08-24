@@ -7,7 +7,7 @@ CREATE TABLE postsTable (
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    images image LONGBLOB
+    image LONGBLOB
 );
 
 -- ALTER TABLE posts ADD image LONGBLOB;

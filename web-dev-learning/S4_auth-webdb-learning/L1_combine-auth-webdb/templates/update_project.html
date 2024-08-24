@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Project</title>
+    <script>
+        function toggleEndDate() {
+            var isPresentChecked = document.getElementById("is_present").checked;
+            var endDateField = document.getElementById("end_date");
+            endDateField.disabled = isPresentChecked;
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Display flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <p>
+        {% for category, message in messages %}
+        <strong>{{ category.capitalize() }}:</strong> {{ message }}
+        {% endfor %}
+    </p>
+    {% endif %}
+    {% endwith %}
+
+    <h1>Update Project</h1>
+    <form action="{{ url_for('update_project', id=post_in_html.id) }}" method="post" enctype="multipart/form-data">
+        <label for="title">Title:</label>
+        <input type="text" name="title" id="title" value="{{ post_in_html.title }}" required>
+        <br>
+
+        <label for="label">Label:</label>
+        <input type="text" name="label" id="lable" value="{{ post_in_html.label }}">
+        <br>
+
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" value="{{ post_in_html.start_date }}" required><br><br>
+
+        {% if post_in_html.end_date: %}
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ post_in_html.end_date }}"><br><br>
+        <label for="is_present">I am currently working this project</label>
+        <input type="checkbox" id="is_present" name="is_present" onclick="toggleEndDate()">
+        <br>
+        <br>
+        {% else: %}
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ post_in_html.end_date }}" disabled><br><br>
+        <label for="is_present">I am currently working this project</label>
+        <input type="checkbox" id="is_present" name="is_present" onclick="toggleEndDate()" checked>
+        <br>
+        <br>
+        {% endif %}
+
+        <label for="content">Content:</label>
+        <textarea name="content" id="content" required>{{ post_in_html.content }}</textarea>
+        <br>
+
+        {% if post_in_html.image %}
+        <img src="data:image/jpeg;base64,{{ post_in_html.image }}" alt="Featured Project Image">
+        <br>
+        {% endif %}
+
+        <label for="image">Replace Image:</label>
+        <input type="file" name="image" id="image">
+        <br>
+
+        <button type="submit">Update</button>
+    </form>
+    <a href="{{ url_for('all_projects') }}">Back to Home</a>
+</body>
+
+</html>

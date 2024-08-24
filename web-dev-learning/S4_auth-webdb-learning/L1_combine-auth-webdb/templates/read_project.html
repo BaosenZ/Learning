@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Read Project</title>
+</head>
+
+<body>
+    <!-- Display flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <p>
+        {% for category, message in messages %}
+        <strong>{{ category.capitalize() }}:</strong> {{ message }}
+        {% endfor %}
+    </p>
+    {% endif %}
+    {% endwith %}
+
+    <h1>{{ project_in_html.title }}</h1>
+    <p>{{ project_in_html.content }}</p>
+    <ul>
+        <li>
+            {{ project_in_html.start_date }} -
+            {% if project_in_html.is_present %} Present
+            {% else %} {{ project_in_html.end_date}}
+            {% endif %}
+        </li>
+        <li>{{ project_in_html.label }}</li>
+    </ul>
+    <p>{{ project_in_html.content }}</p>
+    {% if project_in_html.image %}
+    <img src="data:image/jpeg;base64,{{ project_in_html.image }}" alt="Featured Project Image">
+    <br>
+    {% endif %}
+    <a href="{{ url_for('all_projects') }}">Back to Home</a>
+</body>
+
+</html>

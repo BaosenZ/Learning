@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Experience Form</title>
+    <script>
+        function toggleEndDate() {
+            var isPresentChecked = document.getElementById("is_present").checked;
+            var endDateField = document.getElementById("end_date");
+            endDateField.disabled = isPresentChecked;
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Add Experience</h1>
+    <form action="{{ url_for('add_experience') }}" method="post">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" required><br><br>
+
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date"><br><br>
+
+        <label for="is_present">I am currently working here</label>
+        <input type="checkbox" id="is_present" name="is_present" onclick="toggleEndDate()"><br><br>
+
+        <input type="submit" value="Save">
+    </form>
+
+    <h2>Saved Experiences</h2>
+    <ul>
+        {% for experience in experiences %}
+        <li>{{ experience.start_date }} - {% if experience.is_present %}Present{% else %}{{ experience.end_date }}{%
+            endif %}</li>
+        {% endfor %}
+    </ul>
+</body>
+
+</html>
