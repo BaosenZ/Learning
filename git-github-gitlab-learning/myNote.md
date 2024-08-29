@@ -7,7 +7,7 @@
   - [Refernce](#refernce)
 
 ## GitHub Common use case
-If I want to create a new repo, and do some work on it:
+1. If I want to create a new repo, and do some work on it:
 ```
 mkdir repo-folder
 cd repo-folder
@@ -17,6 +17,7 @@ git add .
 git commit -m "message"
 git push
 ```
+2. If I create a large file, it cannot push to the remote repo. How to unstage this from the commit?
 
 
 ## Git
