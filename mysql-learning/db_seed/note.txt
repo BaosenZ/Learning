@@ -1,0 +1,1 @@
+The two ways to seed the database: .sql and .json. Both works. There are more ways. But I choose .json file and import to db in MySQL workbench.
