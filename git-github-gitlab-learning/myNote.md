@@ -1,12 +1,7 @@
 # Learning Git, GitHub, and GitLab
 
-- [Learning Git, GitHub, and GitLab](#learning-git-github-and-gitlab)
-  - [GitHub Common use case](#github-common-use-case)
-  - [Git](#git)
-  - [GitLab](#gitlab)
-  - [Refernce](#refernce)
-
 ## GitHub Common use case
+
 1. If I want to create a new repo, and do some work on it:
 ```
 mkdir repo-folder
@@ -21,6 +16,7 @@ git push
 
 
 ## Git
+
 - git init
 ```
 mkdir my-cool-website
@@ -58,9 +54,12 @@ unstage a file: `git reset HEAD <FILE>`
 `.gitignore`\
 <br>
 
-- git branch
-create a new branch with: `git checkout -b <BRANCH NAME>`
-to switch back to master/main run: `git checkout master`
+- git branch   
+create a new branch with: `git checkout -b <BRANCH NAME>`  
+to switch back to master/main run: `git checkout master`  
+create a new branch based on another remote branch: `git checkout -b new-branch-name origin/remote-branch-name`  
+
+- git merge
 
 `git merge <BRANCH YOU WISH TO MERGE>`
 
@@ -71,6 +70,7 @@ git merge --abort
 resolving conflicts in VSC or other IDEs
 
 ## GitLab
+
 - Add SSH Key\
 `ssh-keygen`: use default algorithm to generate ssh key, which is saved in "id_ed25519.pub".
 `ssh-keygen -t rsa -b 4096`: use RSA algorithm with bits larger than 4096 to generate ssh key. The key is in "id_rsa.pub" file\
@@ -98,4 +98,5 @@ push a new local branch to a remote Git repo:
 
 
 ## Refernce
+
 - Udemy course by Valentin: https://www.udemy.com/course/introduction-to-git-for-gitlab-projects/
