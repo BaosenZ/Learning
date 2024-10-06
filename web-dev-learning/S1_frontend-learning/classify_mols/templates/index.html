@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molecule Classification</title>
+
+    <style>
+        ul {
+            list-style-type: none;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        .group-name {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Molecule Classification by SMARTS Patterns</h1>
+    <ul id="classification-list"></ul>
+
+    <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
+    <script>
+        // Step 1: Initialize RDKit Module
+        initRDKitModule()
+            .then(function (instance) {
+                RDKitModule = instance;
+                console.log("RDKit version: " + RDKitModule.version());
+
+                classifyMolecules();
+            })
+            .catch((error) => {
+                console.error("Failed to initialize RDKit:", error);
+            });
+    </script>
+
+    <script>
+        // Step 2: Define molecule data and SMARTS patterns
+        const molecules = {{ molecules| tojson }};
+        console.log('Molecules data:', molecules); // Ensure the format is correct in console
+        console.log('Molecules data:', typeof molecules); // Ensure the format is correct in console
+
+        const smartsPatterns = {
+            amide: "[C](=[O])[N]",
+            ether: "[C][O][C]",
+            phosphorous_oxides: "P(=O)"
+        };
+
+        // Step 3: Classify molecules by SMARTS patterns using RDKit
+        function classifyMolecules() {
+            const classification = {
+                amide: [],
+                ether: [],
+                phosphorous_oxides: [],
+                others: []
+            };
+
+            molecules.forEach(({ name, smiles }) => {
+                try {
+                    const mol = RDKitModule.get_mol(smiles);
+                    if (!mol) {
+                        console.error(`Failed to parse SMILES for ${name}: ${smiles}`);
+                        classification.others.push(name);
+                        return;
+                    }
+
+                    let matched = false;
+
+                    // Amide pattern
+                    const amidePattern = RDKitModule.get_qmol(smartsPatterns.amide);
+                    if (mol.get_substruct_match(amidePattern) !== "{}") {
+                        classification.amide.push(name);
+                        matched = true;
+                    }
+
+                    // Ether pattern
+                    const etherPattern = RDKitModule.get_qmol(smartsPatterns.ether);
+                    if (mol.get_substruct_match(etherPattern) !== "{}") {
+                        classification.ether.push(name);
+                        matched = true;
+                    }
+
+                    // Phosphorous oxides pattern
+                    const phosphorousOxidesPattern = RDKitModule.get_qmol(smartsPatterns.phosphorous_oxides);
+                    if (mol.get_substruct_match(phosphorousOxidesPattern) !== "{}") {
+                        classification.phosphorous_oxides.push(name);
+                        matched = true;
+                    }
+
+                    // If no matches, add to others
+                    if (!matched) {
+                        classification.others.push(name);
+                    }
+                } catch (error) {
+                    console.error(`Failed to classify molecule ${name}:`, error);
+                }
+            });
+
+            displayClassification(classification);
+        }
+
+        // Step 4: Display classification results in HTML
+        function displayClassification(classification) {
+            const classificationList = document.getElementById("classification-list");
+
+            Object.keys(classification).forEach(group => {
+                const groupItem = document.createElement("li");
+                groupItem.innerHTML = `<span class="group-name">${group.charAt(0).toUpperCase() + group.slice(1)}:</span>`;
+
+                const moleculeList = document.createElement("ul");
+                classification[group].forEach(moleculeName => {
+                    const moleculeItem = document.createElement("li");
+                    moleculeItem.textContent = moleculeName;
+                    moleculeList.appendChild(moleculeItem);
+                });
+
+                groupItem.appendChild(moleculeList);
+                classificationList.appendChild(groupItem);
+            });
+        }
+    </script>
+</body>
+
+</html>
