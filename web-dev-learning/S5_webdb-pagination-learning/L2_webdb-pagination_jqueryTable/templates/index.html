@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Server-Side Pagination with DataTables</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+</head>
+
+<body>
+    <h1>Server-Side Pagination Table with DataTables</h1>
+    <table id="example" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+    </table>
+
+    <script>
+        $(document).ready(function () {
+            $('#example').DataTable({
+                serverSide: true,
+                ajax: {
+                    url: '/data-source',
+                    type: 'POST'
+                },
+                columns: [
+                    { data: 'id' },
+                    { data: 'name' },
+                    { data: 'age' },
+                    { data: 'email' }
+                ],
+                info: false,
+                ordering: false,
+                paging: true
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Paginated Table</title>
+</head>
+
+<body>
+    <h1>Server-Side Pagination Table</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            <!-- Data will be populated here -->
+        </tbody>
+    </table>
+    <div>
+        <button id="prev-page">Previous</button>
+        <span id="page-info"></span>
+        <button id="next-page">Next</button>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const perPage = 10;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData(currentPage, perPage);
+        });
+
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadData(currentPage, perPage);
+            }
+        });
+
+        document.getElementById('next-page').addEventListener('click', () => {
+            currentPage++;
+            loadData(currentPage, perPage);
+        });
+
+        function loadData(page, perPage) {
+            fetch(`/data?page=${page}&per_page=${perPage}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('table-body');
+                    tbody.innerHTML = '';
+
+                    data.data.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.id}</td>
+                            <td>${item.name}</td>
+                            <td>${item.age}</td>
+                            <td>${item.email}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+
+                    document.getElementById('page-info').innerText =
+                        `Page ${data.page} of ${data.total_pages}`;
+
+                    // Disable buttons if on the first or last page
+                    document.getElementById('prev-page').disabled = (page === 1);
+                    document.getElementById('next-page').disabled = (page === data.total_pages);
+                });
+        }
+    </script>
+</body>
+
+</html>
