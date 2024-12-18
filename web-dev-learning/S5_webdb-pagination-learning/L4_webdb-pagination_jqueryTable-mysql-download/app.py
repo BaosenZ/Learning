@@ -92,6 +92,8 @@ def download_csv():
     # Query to select all data
     cursor.execute("SELECT * FROM users")
     rows = cursor.fetchall()
+    print(rows)
+    print(type(rows[0]))
 
     # Define the CSV file path
     csv_file_path = "all_data.csv"
